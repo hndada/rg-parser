@@ -76,8 +76,7 @@ type Event struct { // delimiter,
 
 type TimingPoints []TimingPoint
 type TimingPoint struct { // delimiter,
-	Time int
-	// Bpm, SpeedScale float64 // todo: method
+	Time        int
 	BeatLength  float64
 	Meter       int
 	SampleSet   int // nofloat
@@ -85,7 +84,6 @@ type TimingPoint struct { // delimiter,
 	Volume      int
 	Uninherited bool
 	Effects     int // nofloat
-	// Kiai        bool // todo: method
 }
 type Colours struct { // manual
 	Combos              [4]color.RGBA
