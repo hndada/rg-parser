@@ -84,7 +84,7 @@ func (tp TimingPoint) Speed() (speed float64, ok bool) {
 	return 100 / (-tp.BeatLength), true
 }
 
-func (tp TimingPoint) isKiai() bool { return tp.Effects&1 != 0 }
+func (tp TimingPoint) IsKiai() bool { return tp.Effects&1 != 0 }
 func (tp TimingPoint) isFirstBarOmitted() bool {
 	return tp.Effects&(1<<3) != 0
 }
