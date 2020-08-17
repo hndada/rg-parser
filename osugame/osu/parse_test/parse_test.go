@@ -2,7 +2,7 @@ package parse_test
 
 import (
 	"fmt"
-	"github.com/hndada/gosu/rg-parser/osugame/osu"
+	"github.com/hndada/rg-parser/osugame/osu"
 	"log"
 	"testing"
 )
