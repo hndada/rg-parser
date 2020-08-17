@@ -1,5 +1,5 @@
 # rg-parser
- Rhythm game file parsers, mainly for mania-styled VSRG
+ Rhythm game file parsers
 
 ## Usage
     go get github.com/hndada/rg-parser
@@ -7,8 +7,8 @@
 ## To do
 - [ ] Tidy .osr parser
 - [ ] BMS parser
-- [ ] OJN/OJM parser
-- [ ] SIM parser
+- [ ] o2jam file(.ojn, .ojm) parser
+- [ ] stepmania file parser
 
  
 ## Reference
