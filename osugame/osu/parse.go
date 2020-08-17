@@ -28,7 +28,7 @@ func Parse(path string) (*FormatOsu, error) {
 		return &o, err
 	}
 	dat = bytes.ReplaceAll(dat, []byte("\r\n"), []byte("\n"))
-	
+
 	var section string
 	for _, l := range bytes.Split(dat, []byte("\n")) {
 		l = bytes.TrimSpace(l)
@@ -280,6 +280,14 @@ func Parse(path string) (*FormatOsu, error) {
 				o.Colours.Combos[2] = rgb
 			case "Combo4":
 				o.Colours.Combos[3] = rgb
+			case "Combo5":
+				o.Colours.Combos[4] = rgb
+			case "Combo6":
+				o.Colours.Combos[5] = rgb
+			case "Combo7":
+				o.Colours.Combos[6] = rgb
+			case "Combo8":
+				o.Colours.Combos[7] = rgb
 			case "SliderTrackOverride":
 				o.Colours.SliderTrackOverride = rgb
 			case "SliderBorder":

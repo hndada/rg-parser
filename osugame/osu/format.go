@@ -86,7 +86,7 @@ type TimingPoint struct { // delimiter,
 	Effects     int // nofloat
 }
 type Colours struct { // manual
-	Combos              [4]color.RGBA
+	Combos              [8]color.RGBA
 	SliderTrackOverride color.RGBA
 	SliderBorder        color.RGBA
 }
