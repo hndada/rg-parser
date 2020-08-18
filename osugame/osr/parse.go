@@ -3,6 +3,7 @@ package osr
 import (
 	"bytes"
 	"encoding/binary"
+	"errors"
 	"github.com/ulikunitz/xz/lzma"
 	"io"
 	"io/ioutil"
@@ -10,133 +11,145 @@ import (
 	"strings"
 )
 
-// 키배치조합: x값, 1 2 4 8 16 32 64
-type OsuReplayAction struct {
-	W int64
-	X float64
-	Y float64
-	Z int64
-}
-
-type OsuReplay struct {
-	GameMode    int8
-	GameVersion int32
-	BeatmapMD5  string // [16]byte
-	PlayerName  string
-	ReplayMD5   string   // [16]byte
-	Nums        [6]int16 // 300, 100, 50, 320, 200, Miss
-	Score       int32
-	Combo       int16
-	FullCombo   int8 // bool
-	ModsBits    int32
-	LifeBar     string
-	TimeStamp   int64
-	ReplayData  []OsuReplayAction
-	OnlineID    int64
-	// AddMods
-}
-
-func ParseOsuReplay(path string) *OsuReplay {
+func Parse(path string) (*Format, error) {
+	var f Format
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
-		panic(err)
+		return &f, err
 	}
-	var rp OsuReplay
 	r := bytes.NewReader(b)
-	binary.Read(r, binary.LittleEndian, &rp.GameMode)
-	binary.Read(r, binary.LittleEndian, &rp.GameVersion)
-	rp.BeatmapMD5 = ReadString(r)
-	rp.PlayerName = ReadString(r)
-	rp.ReplayMD5 = ReadString(r)
-	binary.Read(r, binary.LittleEndian, &rp.Nums)
-	binary.Read(r, binary.LittleEndian, &rp.Score)
-	binary.Read(r, binary.LittleEndian, &rp.Combo)
-	binary.Read(r, binary.LittleEndian, &rp.FullCombo)
-	binary.Read(r, binary.LittleEndian, &rp.ModsBits)
-	rp.LifeBar = ReadString(r)
-	binary.Read(r, binary.LittleEndian, &rp.TimeStamp)
-	rp.ReplayData = parseOsuReplayData(r)
-	binary.Read(r, binary.LittleEndian, &rp.OnlineID)
-	return &rp
+	if err = binary.Read(r, binary.LittleEndian, &f.GameMode); err != nil {
+		return &f, err
+	}
+	if err = binary.Read(r, binary.LittleEndian, &f.GameVersion); err != nil {
+		return &f, err
+	}
+	if f.BeatmapMD5, err = readString(r); err != nil {
+		return &f, err
+	}
+	if f.PlayerName, err = readString(r); err != nil {
+		return &f, err
+	}
+	if f.ReplayMD5, err = readString(r); err != nil {
+		return &f, err
+	}
+	if err = binary.Read(r, binary.LittleEndian, &f.Num300); err != nil {
+		return &f, err
+	}
+	if err = binary.Read(r, binary.LittleEndian, &f.Num100); err != nil {
+		return &f, err
+	}
+	if err = binary.Read(r, binary.LittleEndian, &f.Num50); err != nil {
+		return &f, err
+	}
+	if err = binary.Read(r, binary.LittleEndian, &f.NumGeki); err != nil {
+		return &f, err
+	}
+	if err = binary.Read(r, binary.LittleEndian, &f.NumKatu); err != nil {
+		return &f, err
+	}
+	if err = binary.Read(r, binary.LittleEndian, &f.NumMiss); err != nil {
+		return &f, err
+	}
+	if err = binary.Read(r, binary.LittleEndian, &f.Score); err != nil {
+		return &f, err
+	}
+	if err = binary.Read(r, binary.LittleEndian, &f.Combo); err != nil {
+		return &f, err
+	}
+	if err = binary.Read(r, binary.LittleEndian, &f.FullCombo); err != nil {
+		return &f, err
+	}
+	if err = binary.Read(r, binary.LittleEndian, &f.ModsBits); err != nil {
+		return &f, err
+	}
+	if f.LifeBar, err = readString(r); err != nil {
+		return &f, err
+	}
+	if err = binary.Read(r, binary.LittleEndian, &f.TimeStamp); err != nil {
+		return &f, err
+	}
+	if f.ReplayData, err = parseReplayData(r); err != nil {
+		return &f, err
+	}
+	if err = binary.Read(r, binary.LittleEndian, &f.OnlineID); err != nil {
+		return &f, err
+	}
+	return &f, nil
 }
 
-func ReadString(r *bytes.Reader) string {
+func readString(r *bytes.Reader) (string, error) {
 	first, err := r.ReadByte()
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 	switch first {
 	case 0x00:
-		return ""
+		return "", nil
 	case 0x0b:
-		strlen, err := binary.ReadUvarint(r)
+		length, err := binary.ReadUvarint(r)
 		if err != nil {
-			panic(err)
+			return "", err
 		}
-
-		b := make([]byte, strlen)
-		_, err = r.Read(b)
-		if err != nil {
-			panic(err)
+		b := make([]byte, length)
+		if _, err = r.Read(b); err != nil {
+			return "", err
 		}
-		return string(b)
+		return string(b), nil
 	default:
-		panic("not reach")
+		return "", errors.New("invalid replay file: corrupted string header")
 	}
 }
 
-func parseOsuReplayData(r io.Reader) (replayData []OsuReplayAction) {
-	var replayDataLen int32
-	binary.Read(r, binary.LittleEndian, &replayDataLen)
-
-	var compReplayData = make([]byte, replayDataLen)
-	n, err := r.Read(compReplayData)
-	if err != nil {
-		panic(err)
-	}
-	if int32(n) != replayDataLen {
-		panic("error at parsing replay data")
+func parseReplayData(r io.Reader) ([]Action, error) {
+	var length int32
+	var err error
+	empty := make([]Action, 0)
+	if err = binary.Read(r, binary.LittleEndian, &length); err != nil {
+		return empty, err
 	}
 
-	cr, err := lzma.NewReader(bytes.NewReader(compReplayData))
+	compressedData := make([]byte, length)
+	n, err := r.Read(compressedData)
 	if err != nil {
-		panic(err)
+		return empty, err
+	}
+	if int32(n) != length {
+		return empty, errors.New("invalid replay file: corrupted ReplayData length")
+	}
+	r2, err := lzma.NewReader(bytes.NewReader(compressedData))
+	if err != nil {
+		return empty, err
 	}
 	b := bytes.NewBuffer(make([]byte, 0, 10240))
-	_, err = io.Copy(b, cr) // most stable way
-	if err != nil {
-		panic(err)
+	if _, err = io.Copy(b, r2); err != nil { // most stable way
+		return empty, err
 	}
+	dat := strings.Split(b.String(), ",")
 
-	actions := strings.Split(b.String(), ",")
-	replayData = make([]OsuReplayAction, 0, len(actions))
-	for _, f := range actions[:len(actions)-1] { // the stream ended with sep letter ","
-		var ra OsuReplayAction
+	actions := make([]Action, 0, len(dat)-1)
+	for _, f := range dat[:len(dat)-1] { // the stream ended with sep letter ","
+		var a Action
 		vs := strings.Split(f, "|")
 		if len(vs) != 4 {
-			panic(vs)
+			return actions, errors.New("invalid replay file: corrupted Action data; length is not 4")
 		}
-
-		ra.W, err = strconv.ParseInt(vs[0], 10, 64)
-		if err != nil {
-			panic(err)
-		}
-		ra.X, err = strconv.ParseFloat(vs[1], 64)
-		if err != nil {
-			panic(err)
-		}
-		ra.Y, err = strconv.ParseFloat(vs[2], 64)
-		if err != nil {
-			panic(err)
-		}
-		ra.Z, err = strconv.ParseInt(vs[3], 10, 64)
-		if err != nil {
-			panic(err)
-		}
-		if ra.W == -12345 {
+		if a.W == -12345 {
 			continue
 		}
-		replayData = append(replayData, ra)
+		if a.W, err = strconv.ParseInt(vs[0], 10, 64); err != nil {
+			return actions, errors.New("invalid replay file: corrupted Action data W")
+		}
+		if a.X, err = strconv.ParseFloat(vs[1], 64); err != nil {
+			return actions, errors.New("invalid replay file: corrupted Action data X")
+		}
+		if a.Y, err = strconv.ParseFloat(vs[2], 64); err != nil {
+			return actions, errors.New("invalid replay file: corrupted Action data Y")
+		}
+		if a.Z, err = strconv.ParseInt(vs[3], 10, 64); err != nil {
+			return actions, errors.New("invalid replay file: corrupted Action data Z")
+		}
+		actions = append(actions, a)
 	}
-	return
+	return actions, nil
 }

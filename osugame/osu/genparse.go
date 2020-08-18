@@ -8,6 +8,8 @@ import (
 	"log"
 	"os"
 	"strings"
+
+	"github.com/hndada/rg-parser/internal/tools"
 )
 
 // too many inconsistent pattern in .osu file format, very hard to write fully-generating code
@@ -134,17 +136,6 @@ func PrintSetValue(valName, returnName, localName string, f fieldInfo) {
 	}
 }
 
-// generate compressed name as local name; ex) TimingPoint -> tp
-func genLocalName(structName string) string {
-	var name string
-	for i, s := range strings.ToLower(structName) {
-		if structName[i] != byte(s) {
-			name += string(s)
-		}
-	}
-	return name
-}
-
 func main() {
 	structs, delimiters, m := ScanStructs("format.go")
 	for _, structName := range structs {
@@ -167,7 +158,7 @@ func main() {
 		case "TimingPoint", "HitObject", "SliderParams", "HitSample":
 			// PrintSetValue(m[s], s, delimiters[s], "substruct")
 			var valName string
-			localName := genLocalName(structName)
+			localName := tools.LocalName(structName)
 			returnName := localName
 
 			fmt.Printf("\nfunc new%s(line string) (%s, error) {\n", structName, structName)
