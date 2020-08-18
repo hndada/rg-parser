@@ -7,6 +7,32 @@ import (
 	"strings"
 )
 
+type HitObject struct { // delimiter,
+	X            int
+	Y            int
+	Time         int
+	NoteType     int          // nofloat
+	HitSound     int          // nofloat
+	EndTime      int          // optional
+	SliderParams SliderParams // optional
+	HitSample    HitSample    // optional
+}
+type SliderParams struct { // delimiter,
+	CurveType   string   // one letter
+	CurvePoints [][2]int // delimiter| // delimiter: // slice of paired integers
+	Slides      int
+	Length      float64
+	EdgeSounds  []int    // delimiter|
+	EdgeSets    [][2]int // delimiter| // delimiter:
+}
+type HitSample struct { // delimiter:
+	NormalSet   int // nofloat
+	AdditionSet int // nofloat
+	Index       int // nofloat
+	Volume      int
+	Filename    string
+}
+
 func newHitObject(line string) (HitObject, error) {
 	var ho HitObject
 	vs := strings.SplitN(line, `,`, 6)

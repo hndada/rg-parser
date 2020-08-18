@@ -5,6 +5,16 @@ import (
 	"strings"
 )
 
+// storyboard not implemented yet
+type Event struct { // delimiter,
+	Type      string
+	StartTime int
+	EndTime   int // optional
+	Filename  string
+	XOffset   int
+	YOffset   int
+}
+
 func newEvent(line string) (Event, error) {
 	vs := strings.Split(line, `,`)
 	var e Event

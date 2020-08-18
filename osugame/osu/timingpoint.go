@@ -5,6 +5,17 @@ import (
 	"strings"
 )
 
+type TimingPoint struct { // delimiter,
+	Time        int
+	BeatLength  float64
+	Meter       int
+	SampleSet   int // nofloat
+	SampleIndex int // nofloat
+	Volume      int
+	Uninherited bool
+	Effects     int // nofloat
+}
+
 func newTimingPoint(line string) (TimingPoint, error) {
 	// time,beatLength,meter,sampleSet,sampleIndex,volume,uninherited,effects
 	var tp TimingPoint

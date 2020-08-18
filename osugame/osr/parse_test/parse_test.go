@@ -1,13 +1,14 @@
-package osr
+package parse_test
 
 import (
 	"fmt"
+	"github.com/hndada/rg-parser/osugame/osr"
 	"log"
 	"testing"
 )
 
 func TestParse(t *testing.T) {
-	r, err := Parse("test.osr")
+	r, err := osr.Parse("test.osr")
 	if err != nil {
 		log.Fatal(err)
 	}

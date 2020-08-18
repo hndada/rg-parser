@@ -20,55 +20,59 @@ type fieldInfo struct {
 }
 
 // ScanStructs supposes gofmt was already proceeded at given file
-func ScanStructs(path string) ([]string, map[string]string, map[string][]fieldInfo) {
-	f, err := os.Open(path)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-
+func ScanStructs(paths []string) ([]string, map[string]string, map[string][]fieldInfo) {
 	structs := make([]string, 0)
 	delimiters := make(map[string]string)
 	m := make(map[string][]fieldInfo)
-	scanner := bufio.NewScanner(f)
-	var structName string
-	var infos []fieldInfo
-	for scanner.Scan() {
-		vs := strings.Fields(scanner.Text())
-		switch {
-		case len(vs) == 0 || vs[0] == "//" || vs[len(vs)-1] == "manual": // maybe panic won't happen
-			continue
 
-		case vs[0] == "type" && len(vs) > 2 && vs[2] == "struct":
-			structName = vs[1]
-			structs = append(structs, structName)
-			if strings.HasPrefix(vs[len(vs)-1], `delimiter`) {
-				delimiter := strings.TrimLeft(vs[len(vs)-1], `delimiter`)
-				delimiters[structName] = delimiter
-			}
-			infos = make([]fieldInfo, 0)
+	for _, path := range paths {
+		f, err := os.Open(path)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
 
-		case structName != "" && len(vs) >= 2:
-			info := fieldInfo{name: vs[0], fieldType: vs[1]}
-			if len(vs) >= 4 && vs[3] == "nofloat" {
-				info.fieldType += " (nofloat)"
-			}
-			info.delimiter = make([]string, 0)
-			for i := 0; i < strings.Count(vs[1], "["); i++ {
-				delimiter := strings.TrimLeft(vs[3+2*i], `delimiter`)
-				if delimiter == "(space)" {
-					delimiter = " "
+		scanner := bufio.NewScanner(f)
+		var structName string
+		var infos []fieldInfo
+		for scanner.Scan() {
+			vs := strings.Fields(scanner.Text())
+			switch {
+			case len(vs) == 0 || vs[0] == "//" || vs[len(vs)-1] == "manual": // maybe panic won't happen
+				continue
+
+			case vs[0] == "type" && len(vs) > 2 && vs[2] == "struct":
+				structName = vs[1]
+				structs = append(structs, structName)
+				if strings.HasPrefix(vs[len(vs)-1], `delimiter`) {
+					delimiter := strings.TrimLeft(vs[len(vs)-1], `delimiter`)
+					delimiters[structName] = delimiter
 				}
-				info.delimiter = append(info.delimiter, delimiter)
+				infos = make([]fieldInfo, 0)
+
+			case structName != "" && len(vs) >= 2:
+				info := fieldInfo{name: vs[0], fieldType: vs[1]}
+				if len(vs) >= 4 && vs[3] == "nofloat" {
+					info.fieldType += " (nofloat)"
+				}
+				info.delimiter = make([]string, 0)
+				for i := 0; i < strings.Count(vs[1], "["); i++ {
+					delimiter := strings.TrimLeft(vs[3+2*i], `delimiter`)
+					if delimiter == "(space)" {
+						delimiter = " "
+					}
+					info.delimiter = append(info.delimiter, delimiter)
+				}
+				infos = append(infos, info)
+
+			case vs[0] == "}":
+				m[structName] = infos
+				structName = ""
+
 			}
-			infos = append(infos, info)
-
-		case vs[0] == "}":
-			m[structName] = infos
-			structName = ""
-
 		}
 	}
+
 	for k := range delimiters {
 		delimiters[k] = strings.Replace(delimiters[k], "(space)", " ", -1)
 	}
@@ -133,11 +137,13 @@ func PrintSetValue(valName, returnName, localName string, f fieldInfo) {
 	}
 	%s.%s = slice
 `, valName, f.delimiter[0], returnName, localName, f.name)
+	default:
+		fmt.Printf("\n\n")
 	}
 }
 
 func main() {
-	structs, delimiters, m := ScanStructs("format.go")
+	structs, delimiters, m := ScanStructs([]string{"format.go", "event.go", "timingpoint.go", "hitobject.go"}) //
 	for _, structName := range structs {
 		switch structName {
 		case "General", "Editor", "Metadata", "Difficulty":
