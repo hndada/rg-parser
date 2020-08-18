@@ -2,7 +2,8 @@ package tools
 
 import "strings"
 
-// generate compressed name as local name; ex) TimingPoint -> tp
+// LocalName generates compressed name as local name
+// For example, LocalName returns 'tp' when 'TimingPoint' is input.
 func LocalName(structName string) string {
 	var name string
 	for i, s := range strings.ToLower(structName) {
