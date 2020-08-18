@@ -273,21 +273,11 @@ func (ho HitObject) SliderDuration(tps []TimingPoint, multiplier float64) int {
 	return 0
 }
 
-func (ho HitObject) IsTaikoDon() bool {
-	if ho.NoteType&ComboMask != 1 {
-		return false
-	}
-	return ho.HitSound != HitSoundWhistle && ho.HitSound != HitSoundClap
-}
-func (ho HitObject) IsTaikoKat() bool {
-	if ho.NoteType&ComboMask != 1 {
-		return false
-	}
-	return ho.HitSound == HitSoundWhistle || ho.HitSound == HitSoundClap
-}
-func (ho HitObject) IsTaikoBig() bool {
-	return ho.HitSound&HitSoundFinish != 0
-}
+const (
+	TaikoDonMask = HitSoundNormal // todo: need a test
+	TaikoKatMask = HitSoundWhistle | HitSoundClap
+	TaikoBigMask = HitSoundFinish
+)
 
 // Column returns index of column at mania playfield
 func (ho HitObject) Column(columnCount int) int {
