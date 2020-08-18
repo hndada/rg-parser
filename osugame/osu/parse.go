@@ -2,7 +2,6 @@ package osu
 
 import (
 	"bytes"
-	"image/color"
 	"io/ioutil"
 	"strconv"
 	"strings"
@@ -269,7 +268,7 @@ func Parse(path string) (*Format, error) {
 			o.TimingPoints = append(o.TimingPoints, tp)
 		case "Colours":
 			kv := strings.Split(line, ` : `)
-			rgb := convRGB(kv[1])
+			rgb := newRGB(kv[1])
 			switch kv[0] {
 			case "Combo1":
 				o.Colours.Combos[0] = rgb
@@ -310,23 +309,4 @@ func isSection(line string) bool {
 		return false
 	}
 	return string(line[0]) == "[" && string(line[len(line)-1]) == "]"
-}
-func convRGB(s string) color.RGBA {
-	var rgb color.RGBA
-	for i, c := range strings.Split(s, `,`) {
-		f, err := strconv.ParseFloat(c, 64)
-		if err != nil {
-			f = 0
-		}
-		switch i {
-		case 0:
-			rgb.R = uint8(f)
-		case 1:
-			rgb.G = uint8(f)
-		case 2:
-			rgb.B = uint8(f)
-		}
-	}
-	rgb.A = 255
-	return rgb
 }
