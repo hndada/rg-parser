@@ -19,7 +19,15 @@ func newEvent(line string) (Event, error) {
 	vs := strings.Split(line, `,`)
 	var e Event
 	switch vs[0] {
-	case "0", "1", "Video":
+	case "0":
+		e.Type = "Background"
+	case "1", "Video":
+		e.Type = "Video"
+	case "2", "Break":
+		e.Type = "Break"
+	}
+	switch e.Type {
+	case "Background", "Video":
 		{
 			f, err := strconv.ParseFloat(vs[1], 64)
 			if err != nil {
@@ -44,7 +52,7 @@ func newEvent(line string) (Event, error) {
 			}
 			e.YOffset = int(f)
 		}
-	case "2", "Break":
+	case "Break":
 		{
 			f, err := strconv.ParseFloat(vs[1], 64)
 			if err != nil {
@@ -61,4 +69,23 @@ func newEvent(line string) (Event, error) {
 		}
 	}
 	return e, nil
+}
+
+func (es Events) Background() (Event, bool) {
+	for _, e := range es {
+		if e.Type == "Background" {
+			return e, true
+		}
+	}
+	return Event{}, false
+}
+
+
+func (es Events) Video() (Event, bool) {
+	for _, e := range es {
+		if e.Type == "Video" {
+			return e, true
+		}
+	}
+	return Event{}, false
 }
