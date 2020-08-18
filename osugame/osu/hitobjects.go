@@ -274,8 +274,8 @@ func (ho HitObject) SliderDuration(tps []TimingPoint, multiplier float64) int {
 }
 
 const (
-	TaikoDonMask = HitSoundNormal // todo: need a test
 	TaikoKatMask = HitSoundWhistle | HitSoundClap
+	TaikoDonMask = ^TaikoKatMask // todo: need a test
 	TaikoBigMask = HitSoundFinish
 )
 
