@@ -2,7 +2,7 @@ package osu
 
 import "image/color"
 
-type FormatOsu struct {
+type Format struct {
 	FormatVersion int
 	General
 	Editor

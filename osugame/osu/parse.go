@@ -8,9 +8,8 @@ import (
 	"strings"
 )
 
-// todo: rename FormatOsu
-func Parse(path string) (*FormatOsu, error) {
-	var o = FormatOsu{
+func Parse(path string) (*Format, error) {
+	o := Format{
 		General: General{
 			PreviewTime:      -1,
 			Countdown:        1,
