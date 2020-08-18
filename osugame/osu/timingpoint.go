@@ -76,6 +76,7 @@ func (tp TimingPoint) BPM() (bpm float64, ok bool) {
 	}
 	return 1000 * 60 / tp.BeatLength, true
 }
+
 // Speed returns speed scale. The standard speed value is 1.
 func (tp TimingPoint) Speed() (speed float64, ok bool) {
 	if tp.Uninherited {
