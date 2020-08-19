@@ -1,6 +1,7 @@
 package osu
 
 import (
+	"errors"
 	"strconv"
 	"strings"
 )
@@ -28,6 +29,9 @@ func newEvent(line string) (Event, error) {
 	}
 	switch e.Type {
 	case "Background", "Video":
+		if len(vs) < 5 {
+			return e, errors.New("invalid event: not enough length")
+		}
 		{
 			f, err := strconv.ParseFloat(vs[1], 64)
 			if err != nil {
@@ -54,6 +58,9 @@ func newEvent(line string) (Event, error) {
 		}
 	case "Break":
 		{
+			if len(vs) < 3 {
+				return e, errors.New("invalid event: not enough length")
+			}
 			f, err := strconv.ParseFloat(vs[1], 64)
 			if err != nil {
 				return e, err
@@ -61,7 +68,7 @@ func newEvent(line string) (Event, error) {
 			e.StartTime = int(f)
 		}
 		{
-			f, err := strconv.ParseFloat(vs[1], 64)
+			f, err := strconv.ParseFloat(vs[2], 64)
 			if err != nil {
 				return e, err
 			}
@@ -79,7 +86,6 @@ func (es Events) Background() (Event, bool) {
 	}
 	return Event{}, false
 }
-
 
 func (es Events) Video() (Event, bool) {
 	for _, e := range es {

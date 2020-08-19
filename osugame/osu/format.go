@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 type Format struct {
@@ -57,8 +58,8 @@ type Metadata struct { // delimiter:
 	Version       string
 	Source        string
 	Tags          []string // delimiter(space)
-	BeatmapID     int
-	BeatmapSetID  int
+	BeatmapID     int      // nofloat
+	BeatmapSetID  int      // nofloat
 }
 type Difficulty struct { // delimiter:
 	HPDrainRate       float64
@@ -99,7 +100,7 @@ func Parse(path string) (*Format, error) {
 
 	var section string
 	for _, l := range bytes.Split(dat, []byte("\n")) {
-		l = bytes.TrimSpace(l)
+		l = bytes.TrimLeftFunc(l, unicode.IsSpace) // prevent trimming delimiter
 		line := string(l)
 		if isPass(line) {
 			continue
@@ -110,7 +111,11 @@ func Parse(path string) (*Format, error) {
 		}
 		switch section {
 		case "General":
-			kv := strings.Split(line, `: `)
+			kv := strings.SplitN(line, `: `, 2)
+			if len(kv) < 2 {
+				continue
+			}
+			kv[1] = strings.TrimRightFunc(kv[1], unicode.IsSpace)
 			switch kv[0] {
 			case "AudioFilename":
 				o.General.AudioFilename = kv[1]
@@ -208,7 +213,11 @@ func Parse(path string) (*Format, error) {
 				o.General.SamplesMatchPlaybackRate = b
 			}
 		case "Editor":
-			kv := strings.Split(line, `: `)
+			kv := strings.SplitN(line, `: `, 2)
+			if len(kv) < 2 {
+				continue
+			}
+			kv[1] = strings.TrimRightFunc(kv[1], unicode.IsSpace)
 			switch kv[0] {
 			case "Bookmarks":
 				slice := make([]int, 0)
@@ -246,7 +255,11 @@ func Parse(path string) (*Format, error) {
 				o.Editor.TimelineZoom = f
 			}
 		case "Metadata":
-			kv := strings.Split(line, `:`)
+			kv := strings.SplitN(line, `:`, 2)
+			if len(kv) < 2 {
+				continue
+			}
+			kv[1] = strings.TrimRightFunc(kv[1], unicode.IsSpace)
 			switch kv[0] {
 			case "Title":
 				o.Metadata.Title = kv[1]
@@ -269,22 +282,24 @@ func Parse(path string) (*Format, error) {
 				}
 				o.Metadata.Tags = slice
 			case "BeatmapID":
-				f, err := strconv.ParseFloat(kv[1], 64)
+				i, err := strconv.Atoi(kv[1])
 				if err != nil {
-					// return &o, err
-					f = -1
+					return &o, err
 				}
-				o.Metadata.BeatmapID = int(f)
+				o.Metadata.BeatmapID = i
 			case "BeatmapSetID":
-				f, err := strconv.ParseFloat(kv[1], 64)
+				i, err := strconv.Atoi(kv[1])
 				if err != nil {
-					// return &o, err
-					f = -1
+					return &o, err
 				}
-				o.Metadata.BeatmapSetID = int(f)
+				o.Metadata.BeatmapSetID = i
 			}
 		case "Difficulty":
-			kv := strings.Split(line, `:`)
+			kv := strings.SplitN(line, `:`, 2)
+			if len(kv) < 2 {
+				continue
+			}
+			kv[1] = strings.TrimRightFunc(kv[1], unicode.IsSpace)
 			switch kv[0] {
 			case "HPDrainRate":
 				f, err := strconv.ParseFloat(kv[1], 64)
@@ -371,6 +386,7 @@ func Parse(path string) (*Format, error) {
 	}
 	return &o, nil
 }
+
 func isPass(line string) bool {
 	return len(line) == 0 || len(line) >= 2 && line[:2] == "//"
 }

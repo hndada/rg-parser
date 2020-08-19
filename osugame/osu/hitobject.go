@@ -36,6 +36,9 @@ type HitSample struct { // delimiter:
 func newHitObject(line string) (HitObject, error) {
 	var ho HitObject
 	vs := strings.SplitN(line, `,`, 6)
+	if len(vs) < 6 {
+		return ho, errors.New("invalid hit object: not enough length")
+	}
 	{
 		f, err := strconv.ParseFloat(vs[0], 64)
 		if err != nil {
@@ -128,6 +131,9 @@ func newSliderParams(s string) (SliderParams, error) {
 	// curveType|curvePoints,slides,length,edgeSounds,edgeSets
 	var sp SliderParams
 	vs := strings.Split(s, `,`)
+	if len(vs) < 3 {
+		return sp, errors.New("invalid hit object: not enough length at slider parameter")
+	}
 	{
 		// example: B|200:200|250:200
 		vs2 := strings.Split(vs[0], `|`)
@@ -159,8 +165,11 @@ func newSliderParams(s string) (SliderParams, error) {
 		}
 		sp.Length = f
 	}
-	if len(vs) <= 3 {
+	if len(vs) == 3 {
 		return sp, nil
+	}
+	if len(vs) < 5 {
+		return sp, errors.New("invalid hit object: not enough length at edge sound samples in slider parameter ")
 	}
 	{
 		// example: 2|1|2
@@ -197,6 +206,9 @@ func newHitSample(s string) (HitSample, error) {
 	// normalSet:additionSet:index:volume:filename
 	var hs HitSample
 	vs := strings.Split(s, `:`)
+	if len(vs) < 5 {
+		return hs, errors.New("invalid hit sample: not enough length")
+	}
 	{
 		i, err := strconv.Atoi(vs[0])
 		if err != nil {

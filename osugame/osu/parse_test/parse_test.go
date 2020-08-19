@@ -30,4 +30,3 @@ func BenchmarkParse(b *testing.B) {
 }
 
 // BenchmarkParallel
-

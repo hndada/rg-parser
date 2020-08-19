@@ -147,13 +147,14 @@ func main() {
 	for _, structName := range structs {
 		switch structName {
 		case "General", "Editor", "Metadata", "Difficulty":
-			// PrintSetValue(m[s], s, delimiters[s], "section")
 			localName := "o." + structName
 			valName := "kv[1]"
 			returnName := "&o"
 
 			fmt.Printf("case \"%s\":\n", structName)
-			fmt.Printf("kv := strings.Split(line, `%s`)\n", delimiters[structName])
+			fmt.Printf("kv := strings.SplitN(line, `%s`, 2)\n", delimiters[structName])
+			fmt.Printf("if len(kv) < 2 {\ncontinue\n}\n")
+			fmt.Printf("kv[1] = strings.TrimRightFunc(kv[1], unicode.IsSpace)\n")
 			fmt.Printf("switch kv[0] {\n")
 			for _, f := range m[structName] {
 				fmt.Printf("case \"%s\":", f.name)
@@ -162,7 +163,6 @@ func main() {
 			fmt.Printf("}\n")
 
 		case "TimingPoint", "HitObject", "SliderParams", "HitSample":
-			// PrintSetValue(m[s], s, delimiters[s], "substruct")
 			var valName string
 			localName := tools.LocalName(structName)
 			returnName := localName

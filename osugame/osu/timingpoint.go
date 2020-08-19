@@ -1,6 +1,7 @@
 package osu
 
 import (
+	"errors"
 	"strconv"
 	"strings"
 )
@@ -20,6 +21,9 @@ func newTimingPoint(line string) (TimingPoint, error) {
 	// time,beatLength,meter,sampleSet,sampleIndex,volume,uninherited,effects
 	var tp TimingPoint
 	vs := strings.Split(line, `,`)
+	if len(vs) < 8 {
+		return tp, errors.New("invalid timing point: not enough length")
+	}
 	{
 		f, err := strconv.ParseFloat(vs[0], 64)
 		if err != nil {
