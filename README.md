@@ -5,9 +5,11 @@
     go get github.com/hndada/rg-parser
 
 ## To do
-- [ ] BMS parser
-- [ ] o2jam file(.ojn, .ojm) parser
-- [ ] stepmania file parser
+- [ ] osu! skin.ini
+
+- [ ] BMS files
+- [ ] o2jam file(.ojn, .ojm)
+- [ ] stepmania files
 
  
 ## Reference
