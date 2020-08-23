@@ -92,8 +92,8 @@ func (tp TimingPoint) BPM() (bpm float64, ok bool) {
 	return 1000 * 60 / tp.BeatLength, true
 }
 
-// Velocity returns velocity scale. The standard value is 1.
-func (tp TimingPoint) Velocity() (speed float64, ok bool) {
+// SpeedScale returns velocity scale. The standard value is 1.
+func (tp TimingPoint) SpeedScale() (speed float64, ok bool) {
 	if tp.Uninherited {
 		return 0, false
 	}
