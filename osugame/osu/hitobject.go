@@ -8,29 +8,29 @@ import (
 )
 
 type HitObject struct { // delimiter,
-	X            int
-	Y            int
-	Time         int
-	NoteType     int          // nofloat
-	HitSound     int          // nofloat
-	EndTime      int          // optional
+	X            int          `json:"x"`
+	Y            int          `json:"y"`
+	Time         int          `json:"time"`
+	NoteType     int          `json:"noteType"` // nofloat
+	HitSound     int          `json:"hitSound"` // nofloat
+	EndTime      int          `json:"endTime"`  // optional
 	SliderParams SliderParams // optional
 	HitSample    HitSample    // optional
 }
 type SliderParams struct { // delimiter,
-	CurveType   string   // one letter
+	CurveType   string   `json:"curveType"` // one letter
 	CurvePoints [][2]int // delimiter| // delimiter: // slice of paired integers
-	Slides      int
-	Length      float64
+	Slides      int      `json:"slides"`
+	Length      float64  `json:"length"`
 	EdgeSounds  []int    // delimiter|
 	EdgeSets    [][2]int // delimiter| // delimiter:
 }
 type HitSample struct { // delimiter:
-	NormalSet   int // nofloat
-	AdditionSet int // nofloat
-	Index       int // nofloat
-	Volume      int
-	Filename    string
+	NormalSet   int    `json:"normalSet"`   // nofloat
+	AdditionSet int    `json:"additionSet"` // nofloat
+	Index       int    `json:"index"`       // nofloat
+	Volume      int    `json:"volume"`
+	Filename    string `json:"filename"`
 }
 
 func newHitObject(line string) (HitObject, error) {

@@ -7,14 +7,14 @@ import (
 )
 
 type TimingPoint struct { // delimiter,
-	Time        int
-	BeatLength  float64
-	Meter       int
-	SampleSet   int // nofloat
-	SampleIndex int // nofloat
-	Volume      int
-	Uninherited bool
-	Effects     int // nofloat
+	Time        int     `json:"time"`
+	BeatLength  float64 `json:"beatLength"`
+	Meter       int     `json:"meter"`
+	SampleSet   int     `json:"sampleSet"`   // nofloat
+	SampleIndex int     `json:"sampleIndex"` // nofloat
+	Volume      int     `json:"volume"`
+	Uninherited bool    `json:"uninherited"`
+	Effects     int     `json:"effects"` // nofloat
 }
 
 func newTimingPoint(line string) (TimingPoint, error) {
