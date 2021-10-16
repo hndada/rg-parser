@@ -2,9 +2,10 @@ package parse_test
 
 import (
 	"fmt"
-	"github.com/hndada/rg-parser/osugame/osr"
 	"log"
 	"testing"
+
+	"github.com/hndada/rg-parser/osugame/osr"
 )
 
 func TestParse(t *testing.T) {
