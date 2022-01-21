@@ -17,7 +17,7 @@ type fieldInfo struct {
 }
 
 // ScanStructs supposes gofmt was already proceeded at given file
-// todo: consider making it local library function (i think no)
+// TODO: consider making it local library function (i think no)
 func ScanStructs(path string) ([]string, map[string][]fieldInfo) {
 	f, err := os.Open(path)
 	if err != nil {

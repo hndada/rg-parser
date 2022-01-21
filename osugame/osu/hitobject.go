@@ -266,7 +266,7 @@ const (
 	HitSoundClap
 )
 
-// todo: test yet
+// TODO: test yet
 // supposed whether normal or additional sample set is input in every call
 func (hs HitSample) SampleFilename(sampleSet, hitSound int) string {
 	if hs.Filename != "" {
@@ -295,7 +295,7 @@ func (hs HitSample) SampleFilename(sampleSet, hitSound int) string {
 	return fmt.Sprintf("%s-hit%s%s.wav", sampleSetName, hitSoundName, index)
 }
 
-// todo: need a test
+// TODO: need a test
 func (ho HitObject) SliderDuration(tps []TimingPoint, multiplier float64) int {
 	if ho.NoteType != HitTypeSlider {
 		return 0
@@ -313,7 +313,7 @@ func (ho HitObject) SliderDuration(tps []TimingPoint, multiplier float64) int {
 
 const (
 	TaikoKatMask = HitSoundWhistle | HitSoundClap
-	TaikoDonMask = ^TaikoKatMask // todo: need a test
+	TaikoDonMask = ^TaikoKatMask // TODO: need a test
 	TaikoBigMask = HitSoundFinish
 )
 
